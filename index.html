@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>회계원리 1~20번 O/X 암기카드</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif; background: #f2f2ef; color: #1a1a1a; font-size: 15px; }
+
+/* 헤더 */
+.hdr { background: #1c2b3a; color: #fff; padding: 0.9rem 1rem 0.7rem; position: sticky; top: 0; z-index: 20; }
+.hdr h1 { font-size: 15px; font-weight: 700; }
+.hdr p { font-size: 11px; color: #8aafc8; margin-top: 2px; }
+
+/* 탭 */
+.tabs { display: flex; background: #162230; border-bottom: 1px solid #2a3f52; }
+.tab { flex: 1; text-align: center; padding: 0.6rem; font-size: 13px; font-weight: 600; color: #6a9abf; cursor: pointer; border-bottom: 2px solid transparent; }
+.tab.active { color: #fff; border-bottom-color: #4a9fd4; }
+
+/* 카운터 */
+.counter-bar { padding: 0.5rem 1rem; background: #fff; border-bottom: 1px solid #eee; font-size: 12px; color: #666; display: flex; gap: 12px; align-items: center; }
+.cnt-badge { background: #e8f4fd; color: #1a6a9a; font-weight: 700; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.cnt-badge.red { background: #fdeaea; color: #9a1a1a; }
+
+/* 문제 섹션 헤더 */
+.q-section { margin: 10px 10px 0; }
+.q-title { background: #1c2b3a; color: #fff; border-radius: 10px 10px 0 0; padding: 0.6rem 0.9rem; font-size: 13px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+.q-title span { font-size: 11px; color: #8aafc8; font-weight: 400; }
+
+/* 암기 아이템 */
+.item { background: #fff; border-left: 4px solid #eee; padding: 0.65rem 0.75rem 0.65rem 0.9rem; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 0.6rem; }
+.item:last-child { border-radius: 0 0 10px 10px; border-bottom: none; }
+.item.o-item { border-left-color: #3a9a5c; }
+.item.x-item { border-left-color: #e05252; }
+.item.marked { background: #fffbf0; }
+.item-body { flex: 1; min-width: 0; }
+.item-stmt { font-size: 13px; line-height: 1.55; color: #222; }
+.item-fix { margin-top: 5px; font-size: 12px; color: #1a6090; background: #edf6fd; padding: 4px 8px; border-radius: 5px; line-height: 1.5; }
+.item-fix::before { content: "→ 정정: "; font-weight: 700; color: #1a6090; }
+.badge-ox { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; margin-top: 1px; }
+.badge-o { background: #d4f4e0; color: #1a7a3a; }
+.badge-x { background: #fde0e0; color: #c03030; }
+.btn-mark { flex-shrink: 0; background: none; border: 1.5px solid #ccc; color: #999; font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 20px; cursor: pointer; white-space: nowrap; margin-top: 2px; }
+.btn-mark.on { background: #fff3cd; border-color: #e6a817; color: #a07010; }
+
+/* 빈 상태 */
+.empty { text-align: center; padding: 3rem 1rem; color: #aaa; font-size: 14px; }
+
+/* 각주 */
+.calc-note { font-size: 11px; color: #888; background: #f8f8f8; padding: 3px 8px; border-radius: 4px; margin-top: 4px; font-family: monospace; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>회계원리 1~20번 O/X 암기카드</h1>
+  <p>2025 제28회 주택관리사보 | 각 선택지별 O/X + 정정</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="setTab('all')">전체 보기</div>
+  <div class="tab" onclick="setTab('marked')">⭐ 모름만 보기</div>
+</div>
+
+<div class="counter-bar">
+  <span>전체 <span class="cnt-badge" id="total-cnt">0</span></span>
+  <span>모름 체크 <span class="cnt-badge red" id="mark-cnt">0</span></span>
+</div>
+
+<div id="content"></div>
+
+<script>
+// ========== 데이터 ==========
+const questions = [
+
+{ qnum: 1, title: "회계상 거래 해당 여부",
+  items: [
+    { stmt: "ㄱ. 종업원 채용 계약 + 급여 ₩5,000 책정 → 회계상 거래이다", ox: "X",
+      fix: "단순 계약(미이행). 자산·부채·자본 변동 없어 회계상 거래 아님" },
+    { stmt: "ㄴ. 거래처와 상품 ₩10,000 매입 계약 체결 → 회계상 거래이다", ox: "X",
+      fix: "미이행 계약. 대금도 상품도 아직 이동 없음 → 회계상 거래 아님" },
+    { stmt: "ㄷ. 사무실 임차 계약 + 보증금 ₩30,000 지급 → 회계상 거래이다", ox: "O" },
+    { stmt: "ㄹ. 상품 ₩20,000 외상 판매(대금 후수령) → 회계상 거래이다", ox: "O" },
+  ]
+},
+
+{ qnum: 2, title: "감사의견 유형 (한정의견)",
+  items: [
+    { stmt: "ㄱ. 증거 입수 O + 왜곡표시 중요하나 전반적이지 않음 → 한정의견이다", ox: "O" },
+    { stmt: "ㄴ. 증거 입수 O + 왜곡표시 중요하고 전반적 → 한정의견이다", ox: "X",
+      fix: "왜곡표시가 중요하고 전반적 → 부적정의견" },
+    { stmt: "ㄷ. 증거 미입수 + 영향 중요할 수 있으나 전반적이지 않음 → 한정의견이다", ox: "O" },
+    { stmt: "ㄹ. 증거 미입수 + 영향 중요하고 전반적 가능 → 한정의견이다", ox: "X",
+      fix: "증거 미입수 + 중요하고 전반적 → 의견거절" },
+  ]
+},
+
+{ qnum: 3, title: "소모품 기말 수정분개 (수정전 ₩120,000 → 기말 실제 ₩90,000)",
+  items: [
+    { stmt: "수정분개: (차)소모품비 30,000 / (대)소모품 30,000 이다", ox: "O",
+      fix: "" },
+    { stmt: "수정분개: (차)소모품비 20,000 / (대)소모품 20,000 이다", ox: "X",
+      fix: "소모품비 = 120,000(수정전) − 90,000(기말잔액) = 30,000" },
+    { stmt: "수정분개: (차)소모품비 10,000 / (대)소모품 10,000 이다", ox: "X",
+      fix: "30,000이 맞음. (기중 구입 ₩100,000은 이미 반영된 수정전 잔액 기준 계산)" },
+    { stmt: "수정분개: (차)소모품 20,000 / (대)소모품비 20,000 이다", ox: "X",
+      fix: "차변이 소모품이면 비용 감소 처리 → 방향 반대. 소모품비(차변)가 맞음" },
+  ]
+},
+
+{ qnum: 4, title: "장부마감 시 원장 기입 방법",
+  items: [
+    { stmt: "수익 > 비용 시, 집합손익계정 원장의 차변에 이익잉여금으로 마감한다", ox: "O" },
+    { stmt: "수익계정은 원장의 대변에 '집합손익'으로 마감한다", ox: "X",
+      fix: "수익계정 잔액은 대변 → 마감 시 차변에 '집합손익' 기입 (차변에서 마감)" },
+    { stmt: "비용계정은 원장의 대변에 '차기이월'로 마감한다", ox: "X",
+      fix: "비용계정은 대변에 '집합손익'으로 마감. 차기이월은 자산·부채 계정에 사용" },
+    { stmt: "자산계정은 원장의 차변에 '차기이월'로 마감한다", ox: "X",
+      fix: "자산 잔액은 차변 → 대변에 '차기이월' 기입하여 균형 맞춤" },
+    { stmt: "부채계정은 원장의 차변에 '집합손익'으로 마감한다", ox: "X",
+      fix: "부채 잔액은 대변 → 차변에 '차기이월' 기입. 집합손익은 수익·비용에 사용" },
+  ]
+},
+
+{ qnum: 5, title: "보험료 계산 (지급 ₩18,000 / 선급보험료 기초 ₩6,000→기말 ₩4,000)",
+  items: [
+    { stmt: "20×1년 포괄손익계산서 보험료 = ₩16,000 이다", ox: "X",
+      fix: "보험료 = 지급액 + 기초선급 − 기말선급 = 18,000+6,000−4,000 = 20,000" },
+    { stmt: "20×1년 포괄손익계산서 보험료 = ₩20,000 이다", ox: "O" },
+    { stmt: "20×1년 포괄손익계산서 보험료 = ₩22,000 이다", ox: "X",
+      fix: "20,000이 정답. 선급보험료 감소(6,000→4,000)는 추가 비용 인식 ₩2,000에 해당" },
+  ]
+},
+
+{ qnum: 6, title: "일반목적재무보고의 목적",
+  items: [
+    { stmt: "재무보고서는 기업의 경제적자원 및 청구권에 관한 정보를 제공한다 → 옳다", ox: "O" },
+    { stmt: "재무성과 정보는 경제적자원에서 창출한 수익을 이해하는 데 도움이 된다 → 옳다", ox: "O" },
+    { stmt: "자원·청구권 성격·금액 정보는 재무적 강·약점 식별에 도움을 준다 → 옳다", ox: "O" },
+    { stmt: "한 기간의 재무성과 정보는 수탁책임 평가에도 도움이 된다 → 옳다", ox: "O" },
+    { stmt: "과거 재무성과·수탁책임 이행 정보는 미래 수익 예측에 일반적으로 도움이 되지 않는다", ox: "X",
+      fix: "과거 재무성과 정보는 미래 수익 예측에 일반적으로 도움이 된다" },
+  ]
+},
+
+{ qnum: 7, title: "보강적 질적특성 해당 여부",
+  items: [
+    { stmt: "표현충실성(ㄱ)은 보강적 질적특성이다", ox: "X",
+      fix: "표현충실성은 근본적 질적특성. 보강적 X" },
+    { stmt: "목적적합성(ㄴ)은 보강적 질적특성이다", ox: "X",
+      fix: "목적적합성은 근본적 질적특성. 보강적 X" },
+    { stmt: "비교가능성(ㄷ)은 보강적 질적특성이다", ox: "O" },
+    { stmt: "이해가능성(ㄹ)은 보강적 질적특성이다", ox: "O" },
+    { stmt: "검증가능성(ㅁ)은 보강적 질적특성이다", ox: "O" },
+  ]
+},
+
+{ qnum: 8, title: "재무제표 표시 규정",
+  items: [
+    { stmt: "각 재무제표는 전체 재무제표에서 동등한 비중으로 표시한다 → 옳다", ox: "O" },
+    { stmt: "당기손익과 기타포괄손익을 단일 포괄손익계산서에 두 부분으로 나눠 표시할 수 있다 → 옳다", ox: "O" },
+    { stmt: "재무제표는 함께 공표되는 다른 정보와 명확히 구분·식별되어야 한다 → 옳다", ox: "O" },
+    { stmt: "항목의 표시·분류 변경 시 비교금액도 재분류해야 한다(실무 불가 제외) → 옳다", ox: "O" },
+    { stmt: "K-IFRS 요구사항을 모두 충족하지 않아도 K-IFRS 준수 작성이라고 기재할 수 있다", ox: "X",
+      fix: "모든 요구사항을 충족한 경우에만 K-IFRS 준수 작성이라고 기재할 수 있다" },
+  ]
+},
+
+{ qnum: 9, title: "유동부채 해당 여부",
+  items: [
+    { stmt: "당좌차월 → 유동부채이다", ox: "O" },
+    { stmt: "매입채무 → 유동부채이다", ox: "O" },
+    { stmt: "미지급배당금 → 유동부채이다", ox: "O" },
+    { stmt: "이연법인세부채 → 유동부채이다", ox: "X",
+      fix: "이연법인세부채는 비유동부채로 분류 (유동부채 아님)" },
+    { stmt: "유동성장기차입금 → 유동부채이다", ox: "O" },
+  ]
+},
+
+{ qnum: 10, title: "가중평균 소매재고법 기말재고 (기초₩90K/₩100K + 매입₩630K/₩900K, 매출₩800K)",
+  items: [
+    { stmt: "기말재고자산 장부금액 = ₩140,000 이다", ox: "X",
+      fix: "원가비율=(90+630)/(100+900)=72%, 기말재고판매가=200,000, 원가=200,000×72%=144,000" },
+    { stmt: "기말재고자산 장부금액 = ₩144,000 이다", ox: "O" },
+    { stmt: "기말재고자산 장부금액 = ₩160,000 이다", ox: "X", fix: "144,000이 정답" },
+    { stmt: "기말재고자산 장부금액 = ₩180,000 이다", ox: "X", fix: "144,000이 정답" },
+  ]
+},
+
+{ qnum: 11, title: "선입선출법 매출총이익",
+  items: [
+    { stmt: "매출총이익 = ₩13,750 이다", ox: "X",
+      fix: "6/1 원가=100×50+100×60=11,000 / 12/1 원가=50×60+50×65=6,250 → 총원가 17,250 / 총매출 32,000 → 매출총이익 14,750" },
+    { stmt: "매출총이익 = ₩14,000 이다", ox: "X", fix: "14,750이 정답" },
+    { stmt: "매출총이익 = ₩14,750 이다", ox: "O" },
+    { stmt: "매출총이익 = ₩17,250 이다", ox: "X", fix: "17,250은 매출원가. 매출총이익=14,750" },
+    { stmt: "매출총이익 = ₩18,600 이다", ox: "X", fix: "14,750이 정답" },
+  ]
+},
+
+{ qnum: 12, title: "폭우 소실 상품 추정액 (기초₩5K, 매입₩140K, 매출₩150K, 이윤=원가×25%)",
+  items: [
+    { stmt: "소실 상품 추정액 = ₩5,000 이다", ox: "X",
+      fix: "원가율=100/125=80%, 매출원가=150,000×80%=120,000, 기말재고=5,000+140,000−120,000=25,000" },
+    { stmt: "소실 상품 추정액 = ₩20,000 이다", ox: "X", fix: "25,000이 정답" },
+    { stmt: "소실 상품 추정액 = ₩25,000 이다", ox: "O" },
+    { stmt: "소실 상품 추정액 = ₩31,250 이다", ox: "X", fix: "25,000이 정답" },
+    { stmt: "소실 상품 추정액 = ₩32,500 이다", ox: "X", fix: "25,000이 정답" },
+  ]
+},
+
+{ qnum: 13, title: "총매입액 (기초₩40K, 기말₩30K, 총매출₩498K, 할인₩10K, 에누리₩8K, 매출운임₩5K, 매입환출₩15K, 매입할인₩5K, 매출총이익₩70K)",
+  items: [
+    { stmt: "총매입액 = ₩380,000 이다", ox: "X",
+      fix: "순매출=498-10-8=480 / 매출원가=480-70=410 / 순매입=410-40+30=400 / 총매입=400+15+5=420,000" },
+    { stmt: "총매입액 = ₩400,000 이다", ox: "X", fix: "400,000은 순매입액. 총매입=400+15+5=420,000" },
+    { stmt: "총매입액 = ₩415,000 이다", ox: "X", fix: "420,000이 정답" },
+    { stmt: "총매입액 = ₩420,000 이다", ox: "O" },
+    { stmt: "총매입액 = ₩425,000 이다", ox: "X", fix: "420,000이 정답" },
+  ]
+},
+
+{ qnum: 14, title: "자산 교환 시 취득 토지 원가 (건물FV₩40K, 추가현금₩3K 지급)",
+  items: [
+    { stmt: "토지 취득원가 = ₩25,000 이다 (토지 장부금액)", ox: "X",
+      fix: "상업적 실질 있고 건물FV 명백 → 토지원가 = 건물FV + 추가지급현금 = 40,000+3,000=43,000" },
+    { stmt: "토지 취득원가 = ₩30,000 이다 (건물 장부금액)", ox: "X", fix: "43,000이 정답" },
+    { stmt: "토지 취득원가 = ₩37,000 이다", ox: "X", fix: "43,000이 정답" },
+    { stmt: "토지 취득원가 = ₩40,000 이다 (건물 공정가치만)", ox: "X",
+      fix: "추가 지급 현금 ₩3,000도 포함 → 43,000" },
+    { stmt: "토지 취득원가 = ₩43,000 이다 (건물FV₩40K + 현금₩3K)", ox: "O" },
+  ]
+},
+
+{ qnum: 15, title: "재평가잉여금 (취득₩70K → 20×1말₩65K → 20×2말₩80K)",
+  items: [
+    { stmt: "20×2말 기타포괄손익누계액(재평가잉여금) = ₩0 이다", ox: "X",
+      fix: "20×1: 5,000 하락→당기손실. 20×2: 15,000 상승 중 5,000은 손실 회복(당기이익), 나머지 10,000→재평가잉여금" },
+    { stmt: "20×2말 재평가잉여금 = ₩5,000 이다", ox: "X", fix: "10,000이 정답" },
+    { stmt: "20×2말 재평가잉여금 = ₩8,000 이다", ox: "X", fix: "10,000이 정답" },
+    { stmt: "20×2말 재평가잉여금 = ₩10,000 이다", ox: "O" },
+    { stmt: "20×2말 재평가잉여금 = ₩15,000 이다", ox: "X",
+      fix: "15,000 전체가 재평가잉여금이 아님. 5,000은 기존 손실 회복(당기이익)" },
+  ]
+},
+
+{ qnum: 16, title: "내용연수 동안 매 기간 일정액 감가상각 방법",
+  items: [
+    { stmt: "정액법은 매 기간 일정액을 감가상각한다 → 옳다", ox: "O" },
+    { stmt: "정률법은 매 기간 일정액을 감가상각한다 → 옳다", ox: "X",
+      fix: "정률법은 장부금액에 일정율 적용 → 초기 많고 후기 적은 체감상각" },
+    { stmt: "연수합계법은 매 기간 일정액을 감가상각한다 → 옳다", ox: "X",
+      fix: "연수합계법은 체감상각 (연수비율 적용)" },
+    { stmt: "이중체감법은 매 기간 일정액을 감가상각한다 → 옳다", ox: "X",
+      fix: "이중체감법은 체감상각 (정액법 배율 적용)" },
+    { stmt: "체증상각법은 매 기간 일정액을 감가상각한다 → 옳다", ox: "X",
+      fix: "체증상각법은 초기 적고 후기 많은 점증 상각" },
+  ]
+},
+
+{ qnum: 17, title: "감가상각비 계산 (건물₩100K, 내용연수4년, 잔존₩0 → 20×2초 ₩15K 추가지출, 잔존₩3K 증가)",
+  items: [
+    { stmt: "20×2년 감가상각비 = ₩25,000 이다", ox: "X",
+      fix: "20×1말 장부가=75,000 / 20×2초 장부가=75,000+15,000=90,000 / 잔존=3,000 / 잔여연수=3년 → (90,000-3,000)/3=29,000" },
+    { stmt: "20×2년 감가상각비 = ₩26,000 이다", ox: "X", fix: "29,000이 정답" },
+    { stmt: "20×2년 감가상각비 = ₩28,000 이다", ox: "X", fix: "29,000이 정답" },
+    { stmt: "20×2년 감가상각비 = ₩29,000 이다", ox: "O" },
+    { stmt: "20×2년 감가상각비 = ₩30,000 이다", ox: "X", fix: "29,000이 정답" },
+  ]
+},
+
+{ qnum: 18, title: "투자부동산 공정가치모형 (취득₩100K → 20×1말FV₩110K → 20×2 7/1 처분₩90K)",
+  items: [
+    { stmt: "20×1 당기순이익 +₩10,000 / 20×2 당기순이익 −₩20,000 이다", ox: "O" },
+    { stmt: "20×1 당기순이익 +₩10,000 / 20×2 당기순이익 −₩10,000 이다", ox: "X",
+      fix: "20×2 처분손실 = 90,000−110,000 = −20,000" },
+    { stmt: "20×1 당기순이익 +₩10,000 / 20×2 당기순이익 +₩10,000 이다", ox: "X",
+      fix: "20×2는 처분손실(-20,000) 발생. 공정가치모형은 감가상각 없음" },
+    { stmt: "20×1 당기순이익 +₩20,000 이다", ox: "X",
+      fix: "20×1 평가이익 = 110,000−100,000 = +10,000 (20,000 아님)" },
+  ]
+},
+
+{ qnum: 19, title: "기타포괄손익-공정가치 주식 (취득₩50K → 20×1말FV₩53.5K → 20×2 배당₩1K 수령 → 20×2 처분₩55K)",
+  items: [
+    { stmt: "20×2년 당기순이익 영향 = +₩1,000 이다", ox: "O" },
+    { stmt: "20×2년 당기순이익 영향 = +₩1,500 이다", ox: "X",
+      fix: "기타포괄손익-FV 주식: 배당금만 당기손익. 처분손익은 기타포괄손익 → +1,000" },
+    { stmt: "20×2년 당기순이익 영향 = +₩3,000 이다", ox: "X", fix: "+1,000이 정답" },
+    { stmt: "20×2년 당기순이익 영향 = +₩5,000 이다", ox: "X", fix: "+1,000이 정답" },
+    { stmt: "기타포괄손익-FV 주식의 처분손익은 당기손익에 반영된다", ox: "X",
+      fix: "기타포괄손익-FV 주식 처분손익은 기타포괄손익 처리 (당기손익 아님)" },
+  ]
+},
+
+{ qnum: 20, title: "상각후원가 사채 이자수익 총액 (액면₩1,000K, 표시이율10%, 유효이율8%, 3년)",
+  items: [
+    { stmt: "이자수익 총액 = ₩228,690 이다", ox: "X",
+      fix: "취득가=1,000K×0.7938+100K×2.5771=1,051,510 / 이자수익=수취이자−프리미엄=300,000−51,510=248,490" },
+    { stmt: "이자수익 총액 = ₩240,000 이다", ox: "X", fix: "248,490이 정답" },
+    { stmt: "이자수익 총액 = ₩248,490 이다", ox: "O" },
+    { stmt: "이자수익 총액 = ₩300,000 이다 (3년×액면이자₩100K)", ox: "X",
+      fix: "수취이자 300,000 − 프리미엄 51,510 = 248,490. 프리미엄 취득이므로 수익이 줄어듦" },
+  ]
+},
+
+]; // end questions
+
+// ========== 상태 ==========
+let markedSet = new Set();
+let currentTab = 'all';
+
+function loadMarked() {
+  try { markedSet = new Set(JSON.parse(localStorage.getItem('ox_marked') || '[]')); } catch(e) {}
+}
+function saveMarked() {
+  try { localStorage.setItem('ox_marked', JSON.stringify([...markedSet])); } catch(e) {}
+}
+function toggleMark(id) {
+  if (markedSet.has(id)) markedSet.delete(id);
+  else markedSet.add(id);
+  saveMarked();
+  renderItem(id);
+  updateCounter();
+}
+function setTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='all')||(i===1&&t==='marked')));
+  renderAll();
+}
+
+function itemId(qi, ii) { return `q${qi}_i${ii}`; }
+
+function renderItem(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const on = markedSet.has(id);
+  el.classList.toggle('marked', on);
+  const btn = el.querySelector('.btn-mark');
+  if (btn) { btn.textContent = on ? '⭐ 모름' : '모름?'; btn.classList.toggle('on', on); }
+}
+
+function updateCounter() {
+  const total = questions.reduce((s,q)=>s+q.items.length,0);
+  document.getElementById('total-cnt').textContent = total;
+  document.getElementById('mark-cnt').textContent = markedSet.size;
+}
+
+function renderAll() {
+  const cont = document.getElementById('content');
+  cont.innerHTML = '';
+
+  if (currentTab === 'marked' && markedSet.size === 0) {
+    cont.innerHTML = '<div class="empty">아직 체크한 항목이 없어요.<br>모르는 항목의 [모름?] 버튼을 눌러보세요!</div>';
+    return;
+  }
+
+  questions.forEach(q => {
+    const visibleItems = q.items.filter((_,ii) => currentTab === 'all' || markedSet.has(itemId(q.qnum, ii)));
+    if (visibleItems.length === 0) return;
+
+    const sec = document.createElement('div');
+    sec.className = 'q-section';
+
+    const xCount = visibleItems.filter(it=>it.ox==='X').length;
+    const oCount = visibleItems.filter(it=>it.ox==='O').length;
+    sec.innerHTML = `<div class="q-title">Q${q.qnum}. ${q.title}<span>O:${oCount} X:${xCount}</span></div>`;
+
+    q.items.forEach((item, ii) => {
+      const id = itemId(q.qnum, ii);
+      if (currentTab === 'marked' && !markedSet.has(id)) return;
+
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = `item ${item.ox==='O'?'o-item':'x-item'}${markedSet.has(id)?' marked':''}`;
+      div.innerHTML = `
+        <div class="badge-ox ${item.ox==='O'?'badge-o':'badge-x'}">${item.ox==='O'?'O':'X'}</div>
+        <div class="item-body">
+          <div class="item-stmt">${item.stmt}</div>
+          ${item.ox==='X'&&item.fix ? `<div class="item-fix">${item.fix}</div>` : ''}
+        </div>
+        <button class="btn-mark ${markedSet.has(id)?'on':''}" onclick="toggleMark('${id}')">${markedSet.has(id)?'⭐ 모름':'모름?'}</button>
+      `;
+      sec.appendChild(div);
+    });
+
+    cont.appendChild(sec);
+  });
+}
+
+loadMarked();
+renderAll();
+updateCounter();
+</script>
+</body>
+</html>
